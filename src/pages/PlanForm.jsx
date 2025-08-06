@@ -9,7 +9,8 @@ import { useNavigate } from 'react-router-dom';
 
 const PlanForm = () => {
   const [title, setTitle] = useState('');
-  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
   const navigate = useNavigate();
@@ -47,8 +48,14 @@ const PlanForm = () => {
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={koLocale}>
           <DatePicker
             calendars={2}
-            value={dateRange}
-            onChange={(newValue) => setDateRange(newValue)}
+            value={startDate}
+            onChange={(newValue) => setStartDate(newValue)}
+            localeText={{ start: '시작일', end: '종료일' }}
+          />
+          <DatePicker
+            calendars={2}
+            value={endDate}
+            onChange={(newValue) => setEndDate(newValue)}
             localeText={{ start: '시작일', end: '종료일' }}
           />
         </LocalizationProvider>
