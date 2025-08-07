@@ -13,11 +13,22 @@ const PlanForm = () => {
   const [endDate, setEndDate] = useState(null);
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
+  const [dayDetails, setDayDetails] = useState([
+  { place: '', memo: '' }
+]);
   const navigate = useNavigate();
 
   const handleAddDay = () => {
     setDayTabs([...dayTabs, `Day ${dayTabs.length + 1}`]);
+    setDayDetails([...dayDetails, { place: '', memo: '' }]); // 새 일차 세부 정보 추가
   };
+
+  const handleDetailChange = (field, value) => {
+    const updated = [...dayDetails];
+    updated[currentTab][field] = value;
+    setDayDetails(updated);
+  };
+
 
   const handleSave = () => {
     const newPlan = {
@@ -71,6 +82,21 @@ const PlanForm = () => {
 
       <Paper sx={{ p: 2, mb: 2 }}>
         <Typography>일차별 일정 입력 영역 (Day {currentTab + 1})</Typography>
+        <TextField
+          label="장소"
+          value={dayDetails[currentTab]?.place || ''}
+          onChange={(e) => handleDetailChange('place', e.target.value)}
+          fullWidth
+        />
+        <TextField
+          label="메모"
+          value={dayDetails[currentTab]?.memo || ''}
+          onChange={(e) => handleDetailChange('memo', e.target.value)}
+          fullWidth
+          multiline
+          rows={3}
+          sx={{ mt: 2 }}
+        />
         {/* 👉 여기 나중에 시간, 장소, 메모 입력 들어갈 예정 */}
       </Paper>
 
