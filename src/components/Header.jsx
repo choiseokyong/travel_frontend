@@ -21,6 +21,20 @@ const Header = () => {
         >
           일정 만들기
         </Button>
+        <Button
+          color="inherit"
+          onClick={() => navigate('/login')}
+          sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
+        >
+          로그인
+        </Button>
+        <Button
+          color="inherit"
+          onClick={() => navigate('/signup')}
+          sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
+        >
+          회원가입
+        </Button>
       </Toolbar>
     </AppBar>
     </>
