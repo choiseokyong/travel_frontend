@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -10,21 +11,44 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import { signup } from '../services/authService';
+
 
 const defaultTheme = createTheme();
 
 export default function Signup() {
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('name'),
-      email: data.get('email'),
-      password: data.get('password'),
+  const [form,setForm] = useState({
+    name:'',
+    email:'',
+    passWord:''
+  });
+
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
     });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await signup(form);
+      // 성공 처리
+      setSuccess(true);
+      console.log('회원가입 성공:', response.data);
+    } catch (err) {
+      // 에러 처리
+      setError(err.response?.data?.message || '회원가입 실패');
+    }
     // 여기서 API 호출 → 성공하면 navigate('/login')
     navigate('/login');
   };
@@ -55,6 +79,8 @@ export default function Signup() {
               id="name"
               label="이름"
               name="name"
+              value={form.name}
+              onChange={handleChange}
               autoFocus
             />
             <TextField
@@ -65,15 +91,19 @@ export default function Signup() {
               label="이메일"
               name="email"
               autoComplete="email"
+              value={form.email}
+              onChange={handleChange}
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              name="password"
+              name="passWord"
               label="비밀번호"
               type="password"
-              id="password"
+              id="passWord"
+              value={form.passWord}
+              onChange={handleChange}
             />
             <Button
               type="submit"

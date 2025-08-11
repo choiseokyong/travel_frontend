@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -10,23 +10,54 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext  } from 'react-router-dom';
+import { login } from '../services/authService';
 
 const defaultTheme = createTheme();
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
+  const [logininfo,setLogin] = useState({
+    email:'',
+    passWord:''
+  });
+
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const { onLogin } = useOutletContext();
+
+  const handleChange = (e) => {
+    setLogin({
+      ...logininfo,
+      [e.target.name]: e.target.value,
     });
-    // 여기서 API 호출 → 성공하면 navigate('/')
-    navigate('/');
   };
+
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      
+      setError(null);
+      setSuccess(false);
+  
+      try {
+        const response = await login(logininfo);
+        // 서버에서 JWT 발급받아 저장
+      // console.log('로그인 버튼 클릭됨', logininfo);
+        sessionStorage.setItem("accessToken", response.data);
+        // 성공 처리
+        // setSuccess(true);
+        // console.log('로그인 성공:', response.data);
+        onLogin();
+        navigate('/');
+      } catch (err) {
+        // 에러 처리
+        setError(err.response?.data?.message || '로그인 실패');
+      }
+      // 여기서 API 호출 → 성공하면 navigate('/login')
+      
+    };
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -55,17 +86,21 @@ export default function Login() {
               label="이메일"
               name="email"
               autoComplete="email"
+              value={login.email}
+              onChange={handleChange}
               autoFocus
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              name="password"
+              name="passWord"
               label="비밀번호"
               type="password"
               id="password"
               autoComplete="current-password"
+              value={login.passWord}
+              onChange={handleChange}
             />
             <Button
               type="submit"

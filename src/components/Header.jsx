@@ -3,9 +3,9 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const Header = () => {
+const Header = ({ isLoggedIn, onLogout }) => {
   const navigate = useNavigate();
-
+  console.log(isLoggedIn);
   return (
     <>
     {/* 상단 네비게이션 바 */}
@@ -21,13 +21,24 @@ const Header = () => {
         >
           일정 만들기
         </Button>
-        <Button
-          color="inherit"
-          onClick={() => navigate('/login')}
-          sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
-        >
-          로그인
-        </Button>
+        {isLoggedIn ?(
+          <Button
+            color="inherit"
+            onClick={onLogout}
+            sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
+          >
+            로그아웃
+          </Button>
+        ) : (
+          <Button
+            color="inherit"
+            onClick={() => navigate('/login')}
+            sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
+          >
+            로그인
+          </Button>
+        )}
+        
         <Button
           color="inherit"
           onClick={() => navigate('/signup')}
