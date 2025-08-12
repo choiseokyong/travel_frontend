@@ -7,33 +7,33 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import koLocale from 'date-fns/locale/ko';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { test } from '../services/authService';
+import { planForm } from '../services/authService';
+import { format } from 'date-fns';
 
 const PlanForm = () => {
-  const [title, setTitle] = useState('');
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  // const [title, setTitle] = useState('');
+  // const [startDate, setStartDate] = useState(null);
+  // const [endDate, setEndDate] = useState(null);
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
   const [dayDetails, setDayDetails] = useState([
     [{ place: '', memo: '' }] // Day 1 기본 한 줄
   ]);
-  const navigate = useNavigate();
 
-  const [result, setResult] = useState('');
-  const handleTest = async () => {
-    try {
-      const res = await test();  // 인증 확인용 간단 API 엔드포인트 예시
-      setResult(`성공: ${JSON.stringify(res.data)}`);
-    } catch (error) {
-      if (error.response) {
-        setResult(`실패: ${error.response.status} ${error.response.statusText}`);
-      } else {
-        setResult(`에러: ${error.message}`);
-      }
-    }
+  const [planInfo,setPlanInfo] = useState({
+      title:'',
+      startDate:null,
+      endDate:null,
+      item:dayDetails
+    });
+
+  const handleChange = (field, value) => {
+    setPlanInfo((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
+  const navigate = useNavigate();
 
   // 현재 Day에 장소/메모 한 줄 추가
   const handleAddPlaceMemo = () => {
@@ -66,42 +66,53 @@ const PlanForm = () => {
   };
 
   // 저장
-  const handleSave = () => {
-    const newPlan = {
-      title,
-      startDate: startDate?.toISOString().split('T')[0],
-      endDate: endDate?.toISOString().split('T')[0],
-      days: dayDetails
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // 페이지 리로드 방지
+    
+    const payload = {
+      ...planInfo,
+      startDate: planInfo.startDate
+        ? format(planInfo.startDate, 'yyyy-MM-dd')
+        : null,
+      endDate: planInfo.endDate
+        ? format(planInfo.endDate, 'yyyy-MM-dd')
+        : null,
+      item: planInfo.item
     };
 
-    const stored = JSON.parse(localStorage.getItem('plans')) || [];
-    stored.push(newPlan);
-    localStorage.setItem('plans', JSON.stringify(stored));
-    navigate('/');
+    try {
+      const res = await planForm(payload);
+      console.log('저장 성공', res.data);
+    } catch (err) {
+      console.error('저장 실패', err);
+    }
+    // navigate('/');
   };
 
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h5" gutterBottom>📝 새 여행 일정 만들기</Typography>
-
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
       {/* 여행 제목 & 날짜 선택 */}
       <Stack spacing={2} sx={{ mb: 4 }}>
         <TextField
           label="여행 제목"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={planInfo.title}
+          onChange={(e) => handleChange('title',e.target.value)}
           fullWidth
         />
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={koLocale}>
           <DatePicker
             label="시작일"
-            value={startDate}
-            onChange={(newValue) => setStartDate(newValue)}
+            value={planInfo.startDate}
+            onChange={(newValue) => handleChange('startDate',newValue)}
+            // renderInput={(params) => <TextField {...params} />}
           />
           <DatePicker
             label="종료일"
-            value={endDate}
-            onChange={(newValue) => setEndDate(newValue)}
+            value={planInfo.endDate}
+            onChange={(newValue) => handleChange('endDate',newValue)}
+            // renderInput={(params) => <TextField {...params} />}
           />
         </LocalizationProvider>
       </Stack>
@@ -161,12 +172,9 @@ const PlanForm = () => {
       {/* 버튼 영역 */}
       <Stack direction="row" spacing={2}>
         <Button variant="outlined" onClick={handleAddDay}>+ 일차 추가</Button>
-        <Button variant="contained" onClick={handleSave}>💾 저장</Button>
+        <Button type="submit" variant="contained">💾 저장</Button>
       </Stack>
-      <div>
-      <button onClick={handleTest}>인증 테스트 API 호출</button>
-      <p>{result}</p>
-    </div>
+    </Box>
     </Container>
   );
 };
