@@ -7,6 +7,8 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import koLocale from 'date-fns/locale/ko';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { test } from '../services/authService';
 
 const PlanForm = () => {
   const [title, setTitle] = useState('');
@@ -18,6 +20,20 @@ const PlanForm = () => {
     [{ place: '', memo: '' }] // Day 1 기본 한 줄
   ]);
   const navigate = useNavigate();
+
+  const [result, setResult] = useState('');
+  const handleTest = async () => {
+    try {
+      const res = await test();  // 인증 확인용 간단 API 엔드포인트 예시
+      setResult(`성공: ${JSON.stringify(res.data)}`);
+    } catch (error) {
+      if (error.response) {
+        setResult(`실패: ${error.response.status} ${error.response.statusText}`);
+      } else {
+        setResult(`에러: ${error.message}`);
+      }
+    }
+  };
 
   // 현재 Day에 장소/메모 한 줄 추가
   const handleAddPlaceMemo = () => {
@@ -147,6 +163,10 @@ const PlanForm = () => {
         <Button variant="outlined" onClick={handleAddDay}>+ 일차 추가</Button>
         <Button variant="contained" onClick={handleSave}>💾 저장</Button>
       </Stack>
+      <div>
+      <button onClick={handleTest}>인증 테스트 API 호출</button>
+      <p>{result}</p>
+    </div>
     </Container>
   );
 };

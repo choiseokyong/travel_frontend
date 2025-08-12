@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import PlanForm from './pages/PlanForm';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
  return (
@@ -13,7 +14,9 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/plans/new" element={<PlanForm />} />
+          <Route element={<ProtectedRoute/>}>
+            <Route path="/plans/new" element={<PlanForm />} />
+          </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Route>

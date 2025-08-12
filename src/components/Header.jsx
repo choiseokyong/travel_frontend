@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Header = ({ isLoggedIn, onLogout }) => {
   const navigate = useNavigate();
-  console.log(isLoggedIn);
+  // console.log(isLoggedIn);
   return (
     <>
     {/* 상단 네비게이션 바 */}
@@ -30,6 +30,7 @@ const Header = ({ isLoggedIn, onLogout }) => {
             로그아웃
           </Button>
         ) : (
+          <>
           <Button
             color="inherit"
             onClick={() => navigate('/login')}
@@ -37,15 +38,17 @@ const Header = ({ isLoggedIn, onLogout }) => {
           >
             로그인
           </Button>
+          <Button
+            color="inherit"
+            onClick={() => navigate('/signup')}
+            sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
+          >
+            회원가입
+          </Button>
+          </>
         )}
         
-        <Button
-          color="inherit"
-          onClick={() => navigate('/signup')}
-          sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
-        >
-          회원가입
-        </Button>
+        
       </Toolbar>
     </AppBar>
     </>

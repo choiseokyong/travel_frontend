@@ -44,11 +44,11 @@ export default function Login() {
       try {
         const response = await login(logininfo);
         // 서버에서 JWT 발급받아 저장
-      // console.log('로그인 버튼 클릭됨', logininfo);
-        sessionStorage.setItem("accessToken", response.data);
+      console.log('로그인 버튼 클릭됨', response.data);
+        sessionStorage.setItem("accessToken", response.data.token);
         // 성공 처리
         // setSuccess(true);
-        // console.log('로그인 성공:', response.data);
+        console.log('로그인 성공:', sessionStorage.getItem('accessToken'));
         onLogin();
         navigate('/');
       } catch (err) {
