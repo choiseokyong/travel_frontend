@@ -16,15 +16,14 @@ const PlanForm = () => {
   // const [endDate, setEndDate] = useState(null);
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
-  const [dayDetails, setDayDetails] = useState([
+  const [dayDetails, setDayDetails] = useState(
     [{ place: '', memo: '' }] // Day 1 기본 한 줄
-  ]);
+  );
 
   const [planInfo,setPlanInfo] = useState({
       title:'',
       startDate:null,
-      endDate:null,
-      item:dayDetails
+      endDate:null
     });
 
   const handleChange = (field, value) => {
@@ -37,32 +36,29 @@ const PlanForm = () => {
 
   // 현재 Day에 장소/메모 한 줄 추가
   const handleAddPlaceMemo = () => {
-    const updated = [...dayDetails];
-    updated[currentTab].push({ place: '', memo: '' });
-    setDayDetails(updated);
+   setDayDetails(prev => [...prev, { day: currentTab, place: '', memo: '' }]);
   };
 
   // 장소/메모 입력 변경
-  const handleDetailChange = (index, field, value) => {
-    const updated = [...dayDetails];
-    updated[currentTab][index][field] = value;
-    setDayDetails(updated);
+   const handleDetailChange = (index, field, value) => {
+    setDayDetails(prev => {
+      const updated = [...prev];
+      updated[index][field] = value;
+      return updated;
+    });
   };
 
   // 장소/메모 줄 삭제
   const handleDeletePlaceMemo = (index) => {
-    const updated = [...dayDetails];
-    updated[currentTab].splice(index, 1);
-    if (updated[currentTab].length === 0) {
-      updated[currentTab].push({ place: '', memo: '' }); // 최소 1줄 유지
-    }
-    setDayDetails(updated);
+    setDayDetails(prev => prev.filter((_, i) => i !== index));
   };
 
   // 새 Day 추가
   const handleAddDay = () => {
-    setDayTabs([...dayTabs, `Day ${dayTabs.length + 1}`]);
-    setDayDetails([...dayDetails, [{ place: '', memo: '' }]]);
+    const nextDay = dayTabs.length + 1;
+    setDayTabs(prev => [...prev, nextDay]);
+    setCurrentTab(nextDay);
+    setDayDetails(prev => [...prev, { day: nextDay, place: '', memo: '' }]);
   };
 
   // 저장
@@ -77,7 +73,7 @@ const PlanForm = () => {
       endDate: planInfo.endDate
         ? format(planInfo.endDate, 'yyyy-MM-dd')
         : null,
-      item: planInfo.item
+      item: dayDetails
     };
 
     try {
@@ -132,7 +128,7 @@ const PlanForm = () => {
           Day {currentTab + 1} 일정
         </Typography>
 
-        {dayDetails[currentTab].map((detail, idx) => (
+        {dayDetails.map((detail, idx) => (
           <Box
             key={idx}
             sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: idx > 0 ? 2 : 0 }}
