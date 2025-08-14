@@ -17,7 +17,7 @@ const PlanForm = () => {
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
   const [dayDetails, setDayDetails] = useState(
-    [{ place: '', memo: '' }] // Day 1 기본 한 줄
+    [{ place: '', memo: '', planSort:1 }] // Day 1 기본 한 줄
   );
 
   const [planInfo,setPlanInfo] = useState({
@@ -36,7 +36,7 @@ const PlanForm = () => {
 
   // 현재 Day에 장소/메모 한 줄 추가
   const handleAddPlaceMemo = () => {
-   setDayDetails(prev => [...prev, { day: currentTab, place: '', memo: '' }]);
+   setDayDetails(prev => [...prev, { day: currentTab, place: '', memo: '',planSort:prev[prev.length - 1].planSort+1 }]);
   };
 
   // 장소/메모 입력 변경
@@ -50,7 +50,11 @@ const PlanForm = () => {
 
   // 장소/메모 줄 삭제
   const handleDeletePlaceMemo = (index) => {
-    setDayDetails(prev => prev.filter((_, i) => i !== index));
+    setDayDetails(prev => prev.filter((_, i) => i !== index)
+                  .map((item,idx)=>({
+                    ...item,
+                    planSort: idx + 1
+                  })));
   };
 
   // 새 Day 추가
