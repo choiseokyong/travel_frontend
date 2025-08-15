@@ -12,8 +12,8 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('accessToken'); // 로그인 시 저장된 토큰
-    console.log('요청 URL:', config.url);
-  console.log('요청 헤더:', config.headers);
+  //   console.log('요청 URL:', config.url);
+  // console.log('요청 헤더:', config.headers);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

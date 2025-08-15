@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import PlanForm from './pages/PlanForm';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import PlanList from './pages/PlanList';
+import PlanDetail from './pages/PlanDetail';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -15,6 +17,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route element={<ProtectedRoute/>}>
+            <Route path="/plans/list" element={<PlanList />} />
+            <Route path="/plans/:id" element={<PlanDetail />} />
             <Route path="/plans/new" element={<PlanForm />} />
           </Route>
           <Route path="/login" element={<Login />} />

@@ -16,6 +16,13 @@ const Header = ({ isLoggedIn, onLogout }) => {
         </Typography>
         <Button
           color="inherit"
+          onClick={() => navigate('/plans/list')}
+          sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
+        >
+          나의 일정
+        </Button>
+        <Button
+          color="inherit"
           onClick={() => navigate('/plans/new')}
           sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
         >
