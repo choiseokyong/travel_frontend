@@ -16,9 +16,9 @@ const PlanForm = () => {
   // const [endDate, setEndDate] = useState(null);
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
-  const [dayDetails, setDayDetails] = useState(
-    [{ place: '', memo: '', planSort:1 }] // Day 1 기본 한 줄
-  );
+  const [days, setDays] = useState([
+    { day: 1, details: [{ place: "", memo: "", planSort: 1 }] }
+  ]);
 
   const [planInfo,setPlanInfo] = useState({
       title:'',
@@ -36,34 +36,57 @@ const PlanForm = () => {
 
   // 현재 Day에 장소/메모 한 줄 추가
   const handleAddPlaceMemo = () => {
-   setDayDetails(prev => [...prev, { day: currentTab, place: '', memo: '',planSort:prev[prev.length - 1].planSort+1 }]);
+    setDays(prev => {
+      return prev.map((day, idx) => {
+        if (idx === currentTab) {
+          const nextSort =
+            day.details.length > 0
+              ? day.details[day.details.length - 1].planSort + 1
+              : 1;
+
+          // 새 배열 생성
+          return {
+            ...day,
+            details: [...day.details, { place: "", memo: "", planSort: nextSort }]
+          };
+        }
+        return day;
+      });
+    });
   };
 
+
+
   // 장소/메모 입력 변경
-   const handleDetailChange = (index, field, value) => {
-    setDayDetails(prev => {
+  const handleDetailChange = (detailIdx, field, value) => {
+    setDays(prev => {
       const updated = [...prev];
-      updated[index][field] = value;
+      updated[currentTab].details[detailIdx][field] = value;
       return updated;
     });
   };
 
+
   // 장소/메모 줄 삭제
-  const handleDeletePlaceMemo = (index) => {
-    setDayDetails(prev => prev.filter((_, i) => i !== index)
-                  .map((item,idx)=>({
-                    ...item,
-                    planSort: idx + 1
-                  })));
+  const handleDeletePlaceMemo = (detailIdx) => {
+    setDays(prev => {
+      const updated = [...prev];
+      updated[currentTab].details = updated[currentTab].details
+        .filter((_, i) => i !== detailIdx)
+        .map((item, idx) => ({ ...item, planSort: idx + 1 }));
+      return updated;
+    });
   };
+
 
   // 새 Day 추가
   const handleAddDay = () => {
-    const nextDay = dayTabs.length + 1;
-    setDayTabs(prev => [...prev, nextDay]);
-    setCurrentTab(nextDay);
-    setDayDetails(prev => [...prev, { day: nextDay, place: '', memo: '' }]);
+    const nextDay = days.length + 1;
+    setDays(prev => [...prev, { day: nextDay, details: [{ place: "", memo: "", planSort: 1 }] }]);
+    setDayTabs(prev => [...prev, `Day ${nextDay}`]);
+    setCurrentTab(nextDay - 1);
   };
+
 
   // 저장
   const handleSubmit = async (e) => {
@@ -77,7 +100,9 @@ const PlanForm = () => {
       endDate: planInfo.endDate
         ? format(planInfo.endDate, 'yyyy-MM-dd')
         : null,
-      item: dayDetails
+      item: days.flatMap(day =>
+        day.details.map(d => ({ ...d, day: day.day }))
+      )
     };
 
     try {
@@ -132,32 +157,26 @@ const PlanForm = () => {
           Day {currentTab + 1} 일정
         </Typography>
 
-        {dayDetails.map((detail, idx) => (
-          <Box
-            key={idx}
-            sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: idx > 0 ? 2 : 0 }}
-          >
+        {days[currentTab].details.map((detail, idx) => (
+          <Box key={idx} sx={{ display: "flex", gap: 2, alignItems: "center", mt: idx > 0 ? 2 : 0 }}>
             <TextField
               label="장소"
               value={detail.place}
-              onChange={(e) => handleDetailChange(idx, 'place', e.target.value)}
+              onChange={(e) => handleDetailChange(idx, "place", e.target.value)}
               fullWidth
             />
             <TextField
               label="메모"
               value={detail.memo}
-              onChange={(e) => handleDetailChange(idx, 'memo', e.target.value)}
+              onChange={(e) => handleDetailChange(idx, "memo", e.target.value)}
               fullWidth
             />
-            <IconButton
-              color="error"
-              onClick={() => handleDeletePlaceMemo(idx)}
-              sx={{ flexShrink: 0 }}
-            >
+            <IconButton color="error" onClick={() => handleDeletePlaceMemo(idx)} sx={{ flexShrink: 0 }}>
               <DeleteIcon />
             </IconButton>
           </Box>
         ))}
+
 
         <Button
           variant="outlined"
