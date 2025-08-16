@@ -10,7 +10,21 @@ import { useNavigate } from 'react-router-dom';
 import { planForm } from '../services/authService';
 import { format } from 'date-fns';
 
+// 팝업
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+
+
 const PlanForm = () => {
+  // 팝업 상태 값
+  const [searchResults, setSearchResults] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(null);
   // const [title, setTitle] = useState('');
   // const [startDate, setStartDate] = useState(null);
   // const [endDate, setEndDate] = useState(null);
@@ -35,28 +49,44 @@ const PlanForm = () => {
   const navigate = useNavigate();
 
   // Kakao 지도 키워드 변환
-  const geocode = async (keyword) => {
-    if (!keyword) return null;
-    try {
-      const res = await fetch(
-        `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(keyword)}`,
-        { headers: { Authorization: `KakaoAK ${process.env.REACT_APP_KAKAO_API_KEY}` } }
-      );
-      const data = await res.json();
-      if (data.documents.length > 0) {
-        return {
-          lat: parseFloat(data.documents[0].y),
-          lng: parseFloat(data.documents[0].x),
-          place_name: data.documents[0].place_name,
-          address_name: data.documents[0].address_name
-        };
-      }
-      return null;
-    } catch (err) {
-      console.error("키워드 변환 실패", err);
-      return null;
+  const searchPlace = async (keyword) => {
+  if (!keyword) return [];
+  try {
+    const res = await fetch(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(keyword)}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
+    );
+    console.log("status:", res.status);
+    const data = await res.json();
+    console.log("data:", data);
+
+    // 구글 API는 results 배열에 검색 결과가 들어있음
+    if (!data.results) return [];
+    
+    return data.results.map(doc => ({
+      lat: doc.geometry.location.lat,
+      lng: doc.geometry.location.lng,
+      place_name: doc.name,
+      address_name: doc.formatted_address
+    }));
+  } catch (err) {
+    console.error("키워드 변환 실패", err);
+    return [];
+  }
+};
+
+
+  const handleSearch = async (keyword, idx) => {
+    const results = await searchPlace(keyword);
+    console.log(results)
+    if (results.length > 0) {
+      setSearchResults(results);
+      setSelectedIdx(idx);
+      setOpenDialog(true);
+    } else {
+      alert("검색 결과가 없습니다1.");
     }
   };
+
 
 
   // 현재 Day에 장소/메모 한 줄 추가
@@ -195,19 +225,13 @@ const PlanForm = () => {
               fullWidth
             />
             <Button
-                variant="outlined"
-                size="small"
-                onClick={async () => {
-                  const coords = await geocode(detail.place);
-                  if (coords) {
-                    setDays(prev => {
-                      const updated = [...prev];
-                      updated[currentTab].details[idx] = { ...updated[currentTab].details[idx], ...coords };
-                      return updated;
-                    });
-                  }
-                }}
-              >🔍검색</Button>
+              variant="outlined"
+              size="small"
+              onClick={() => handleSearch(detail.place, idx)}
+            >
+              🔍검색
+            </Button>
+            
             <IconButton color="error" onClick={() => handleDeletePlaceMemo(idx)} sx={{ flexShrink: 0 }}>
               <DeleteIcon />
             </IconButton>
@@ -230,8 +254,43 @@ const PlanForm = () => {
         <Button variant="outlined" onClick={handleAddDay}>+ 일차 추가</Button>
         <Button type="submit" variant="contained">💾 저장</Button>
       </Stack>
+
+      
     </Box>
+    <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth>
+      <DialogTitle>검색 결과 선택</DialogTitle>
+      <DialogContent>
+        <List>
+          {searchResults.map((place, i) => (
+            <ListItem 
+              button 
+              key={i} 
+              onClick={() => {
+                setDays(prev => {
+                  const updated = [...prev];
+                  updated[currentTab].details[selectedIdx] = { 
+                    ...updated[currentTab].details[selectedIdx], 
+                    ...place 
+                  };
+                  return updated;
+                });
+                setOpenDialog(false);
+              }}
+            >
+              <ListItemText 
+                primary={place.place_name} 
+                secondary={place.address_name} 
+              />
+            </ListItem>
+          ))}
+        </List>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpenDialog(false)}>닫기</Button>
+      </DialogActions>
+    </Dialog>
     </Container>
+    
   );
 };
 
