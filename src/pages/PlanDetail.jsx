@@ -19,6 +19,18 @@ const PlanDetail = () => {
   const { id } = useParams();
   const numericId = Number(id);
   const [plan, setPlan] = useState(null);
+  // Day별 객체로 변환
+  const dayMap = plan?.item?.reduce((acc, curr) => {
+    if (!acc[curr.day]) acc[curr.day] = [];
+    acc[curr.day].push(curr);
+    return acc;
+  }, {}) || {}; 
+  // 묶인 데이터를 배열로 변환(렌더링용)
+  const days = Object.keys(dayMap).map(day => ({
+    day: Number(day),
+    details: dayMap[day]
+  }));
+
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -61,57 +73,30 @@ const PlanDetail = () => {
       <Divider sx={{ my: 2 }} />
 
       {/* Day별 일정 */}
-      {plan.item && plan.item.map((day, index) => (
-        <Card
-          key={index}
-          sx={{
-            my: 3,
-            borderRadius: 3,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          }}
-        >
+      {days.map(d => (
+        <Card key={d.day} sx={{ my: 3, borderRadius: 3, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
           <CardContent>
-            <Chip
-              label={`Day ${index + 1}`}
-              color="primary"
-              sx={{ mb: 2, fontWeight: 'bold' }}
-            />
-            {day.places && day.places.length > 0 ? (
-              <List>
-                {day.places.map((place, idx) => (
-                  <ListItem
-                    key={idx}
-                    sx={{
-                      background: idx % 2 === 0 ? '#f0f7ff' : '#fff',
-                      borderRadius: 2,
-                      mb: 1,
-                    }}
-                  >
-                    <ListItemIcon>
-                      <Place color="action" />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Typography variant="body1" fontWeight="bold">
-                          {place.name}
-                        </Typography>
-                      }
-                      secondary={
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <AccessTime fontSize="small" />
-                          <Typography variant="body2" color="text.secondary">
-                            {place.time}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
+            <Chip label={`Day ${d.day}`} color="primary" sx={{ mb: 2, fontWeight: 'bold' }} />
+            
+            {d.details.length > 0 ? (
+              d.details.map((item, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    p: 1,
+                    mb: 1,
+                    background: idx % 2 === 0 ? '#f0f7ff' : '#fff',
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography variant="body1" fontWeight="bold">{item.place}</Typography>
+                  <Typography variant="body2" color="text.secondary">{item.memo}</Typography>
+                </Box>
+              ))
             ) : (
-              <Typography variant="body2" color="text.secondary">
-                등록된 장소가 없습니다.
-              </Typography>
+              <Typography variant="body2" color="text.secondary">등록된 장소가 없습니다.</Typography>
             )}
           </CardContent>
         </Card>

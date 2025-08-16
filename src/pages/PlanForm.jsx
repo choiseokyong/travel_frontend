@@ -17,7 +17,7 @@ const PlanForm = () => {
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
   const [days, setDays] = useState([
-    { day: 1, details: [{ place: "", memo: "", planSort: 1 }] }
+    { day: 1, details: [{ place: "", memo: "", planSort: 1,lat:null, lng:null }] }
   ]);
 
   const [planInfo,setPlanInfo] = useState({
@@ -34,6 +34,31 @@ const PlanForm = () => {
   };
   const navigate = useNavigate();
 
+  // Kakao 지도 키워드 변환
+  const geocode = async (keyword) => {
+    if (!keyword) return null;
+    try {
+      const res = await fetch(
+        `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(keyword)}`,
+        { headers: { Authorization: `KakaoAK ${process.env.REACT_APP_KAKAO_API_KEY}` } }
+      );
+      const data = await res.json();
+      if (data.documents.length > 0) {
+        return {
+          lat: parseFloat(data.documents[0].y),
+          lng: parseFloat(data.documents[0].x),
+          place_name: data.documents[0].place_name,
+          address_name: data.documents[0].address_name
+        };
+      }
+      return null;
+    } catch (err) {
+      console.error("키워드 변환 실패", err);
+      return null;
+    }
+  };
+
+
   // 현재 Day에 장소/메모 한 줄 추가
   const handleAddPlaceMemo = () => {
     setDays(prev => {
@@ -47,7 +72,7 @@ const PlanForm = () => {
           // 새 배열 생성
           return {
             ...day,
-            details: [...day.details, { place: "", memo: "", planSort: nextSort }]
+            details: [...day.details, { place: "", memo: "", planSort: nextSort, lat: null, lng: null }]
           };
         }
         return day;
@@ -82,7 +107,7 @@ const PlanForm = () => {
   // 새 Day 추가
   const handleAddDay = () => {
     const nextDay = days.length + 1;
-    setDays(prev => [...prev, { day: nextDay, details: [{ place: "", memo: "", planSort: 1 }] }]);
+    setDays(prev => [...prev, { day: nextDay, details: [{ place: "", memo: "", planSort: 1, lat: null, lng: null }] }]);
     setDayTabs(prev => [...prev, `Day ${nextDay}`]);
     setCurrentTab(nextDay - 1);
   };
@@ -131,13 +156,11 @@ const PlanForm = () => {
             label="시작일"
             value={planInfo.startDate}
             onChange={(newValue) => handleChange('startDate',newValue)}
-            // renderInput={(params) => <TextField {...params} />}
           />
           <DatePicker
             label="종료일"
             value={planInfo.endDate}
             onChange={(newValue) => handleChange('endDate',newValue)}
-            // renderInput={(params) => <TextField {...params} />}
           />
         </LocalizationProvider>
       </Stack>
@@ -171,6 +194,20 @@ const PlanForm = () => {
               onChange={(e) => handleDetailChange(idx, "memo", e.target.value)}
               fullWidth
             />
+            <Button
+                variant="outlined"
+                size="small"
+                onClick={async () => {
+                  const coords = await geocode(detail.place);
+                  if (coords) {
+                    setDays(prev => {
+                      const updated = [...prev];
+                      updated[currentTab].details[idx] = { ...updated[currentTab].details[idx], ...coords };
+                      return updated;
+                    });
+                  }
+                }}
+              >🔍검색</Button>
             <IconButton color="error" onClick={() => handleDeletePlaceMemo(idx)} sx={{ flexShrink: 0 }}>
               <DeleteIcon />
             </IconButton>
