@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import {
   Typography,
   Box,
+  Button,
   Card,
   CardContent,
   Divider,
@@ -55,12 +56,39 @@ const PlanDetail = () => {
     );
   }
 
+  // const handleDetailChange = (dayIdx, detailIdx, field, value) => {
+  //   setPlan(prev => {
+  //     const updatedItems = [...prev.item];
+  //     const targetIdx = updatedItems.findIndex(
+  //       d => d.day === days[dayIdx].day && d.planSort === days[dayIdx].details[detailIdx].planSort
+  //     );
+  //     updatedItems[targetIdx][field] = value;
+  //     return { ...prev, item: updatedItems };
+  //   });
+  // };
+
+  // const handleDelete = (dayIdx, detailIdx) => {
+  //   setPlan(prev => {
+  //     const updatedItems = prev.item.filter(
+  //       d => !(d.day === days[dayIdx].day && d.planSort === days[dayIdx].details[detailIdx].planSort)
+  //     );
+  //     return { ...prev, item: updatedItems };
+  //   });
+  // };
+
   return (
     <Box p={3} sx={{ background: '#f9fafb', minHeight: '100vh' }}>
       {/* 여행 제목 */}
-      <Typography variant="h4" gutterBottom fontWeight="bold">
-        {plan.title}
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h4" gutterBottom fontWeight="bold">
+          {plan.title}
+        </Typography>
+        <Box>
+          {/* 상단 전체 수정/삭제 버튼 */}
+          <Button variant="outlined" size="small" sx={{ mr: 1 }}>수정</Button>
+          <Button variant="outlined" color="error" size="small">삭제</Button>
+        </Box>
+      </Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <Event color="primary" />
         <Typography variant="body1">
@@ -76,24 +104,45 @@ const PlanDetail = () => {
       {days.map(d => (
         <Card key={d.day} sx={{ my: 3, borderRadius: 3, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
           <CardContent>
-            <Chip label={`Day ${d.day}`} color="primary" sx={{ mb: 2, fontWeight: 'bold' }} />
-            
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Chip label={`Day ${d.day}`} color="primary" sx={{ mb: 2, fontWeight: 'bold' }} />
+              <Button 
+                variant="outlined" 
+                color="error" 
+                size="small"
+                onClick={() => handleDeleteDay(d.day)}
+              >
+                Day 삭제
+              </Button>
+            </Box>
             {d.details.length > 0 ? (
               d.details.map((item, idx) => (
                 <Box
                   key={idx}
                   sx={{
                     display: 'flex',
-                    flexDirection: 'column',
+                    alignItems: 'center',  // 텍스트와 버튼 세로 중앙 정렬
+                    justifyContent: 'space-between', // 좌우로 배치
                     p: 1,
                     mb: 1,
                     background: idx % 2 === 0 ? '#f0f7ff' : '#fff',
                     borderRadius: 1,
                   }}
                 >
-                  <Typography variant="body1" fontWeight="bold">{item.place}</Typography>
-                  <Typography variant="body2" color="text.secondary">{item.memo}</Typography>
+                  <Box>
+                    <Typography variant="body1" fontWeight="bold">{item.place}</Typography>
+                    <Typography variant="body2" color="text.secondary">{item.memo}</Typography>
+                  </Box>
+                  <Button 
+                    variant="outlined" 
+                    color="error" 
+                    size="small"
+                    onClick={() => handleDeleteItem(d.day, idx)}
+                  >
+                    삭제
+                  </Button>
                 </Box>
+
               ))
             ) : (
               <Typography variant="body2" color="text.secondary">등록된 장소가 없습니다.</Typography>

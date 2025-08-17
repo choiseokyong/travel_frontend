@@ -20,7 +20,7 @@ const PlanList = () => {
       try {
         const res = await planList();
         setPlans(res.data);
-        console.log('저장 성공', res.data);
+        // console.log('저장 성공', res.data);
       } catch (err) {
         console.error('저장 실패', err);
       }
@@ -54,8 +54,8 @@ const PlanList = () => {
       </Typography>
 
       <Grid container spacing={3}>
-        {plans.map((plan) => (
-          <Grid item xs={12} sm={6} md={4} key={plan.id}>
+        {plans.map((plan,idx) => (
+          <Grid item xs={12} sm={6} md={4} key={idx}>
             <Card
               onClick={() => navigate(`/plans/${plan.no}`)}
               sx={{

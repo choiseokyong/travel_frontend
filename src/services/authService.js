@@ -15,3 +15,6 @@ export const planList = (data) => api.get('/plans/list');
 
 // plan 1개 목록
 export const planListOne = (id) => api.get(`/plans/list/${id}`);
+
+// 구글 placeapi 현재 사용 x
+// export const placeApi = (keyword) => api.get(`/api/places?query=${encodeURIComponent(keyword)}`);

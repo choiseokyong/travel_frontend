@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Container, TextField, Button, Typography, Stack, Box, Tabs, Tab, Paper, IconButton
 } from '@mui/material';
@@ -7,7 +7,7 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import koLocale from 'date-fns/locale/ko';
 import { useNavigate } from 'react-router-dom';
-import { planForm } from '../services/authService';
+import { planForm, placeApi } from '../services/authService';
 import { format } from 'date-fns';
 
 // 팝업
@@ -48,78 +48,41 @@ const PlanForm = () => {
   };
   const navigate = useNavigate();
 
-  const [kakaoLoaded, setKakaoLoaded] = useState(false);
-
-  // 카카오맵 SDK 로드
- useEffect(() => {
-  const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-  if (!kakaoKey) return;
-
-  const script = document.createElement('script');
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services&autoload=false`;
-  script.async = true;
-
-  script.onload = () => {
-    console.log("Kakao SDK 스크립트 로드 완료");
-
-    // SDK가 완전히 준비될 때까지 load() 사용
-    window.kakao.maps.load(() => {
-      console.log("Kakao Maps 준비 완료", window.kakao.maps.services);
-      setKakaoLoaded(true);
-    });
-  };
-
-  document.head.appendChild(script);
-}, []);
-
-  // 🔹 카카오맵 검색
+  // Kakao 지도 키워드 변환
   const searchPlace = async (keyword) => {
-  if (!kakaoLoaded || !window.kakao?.maps?.services || !keyword) return [];
+  if (!keyword) return [];
+  try {
+    const res = await placeApi(keyword);
+    console.log("status:", res.status);
+    const data = res.data;
+    console.log("data:", data);
 
-  return new Promise((resolve, reject) => {
-    const ps = new window.kakao.maps.services.Places();
-    ps.keywordSearch(keyword, (data, status) => {
-      console.log("검색 상태:", status, data);
-      if (status === window.kakao.maps.services.Status.OK) {
-        const results = data.map(item => ({
-          lat: item.y,
-          lng: item.x,
-          place_name: item.place_name,
-          address_name: item.road_address_name || item.address_name
-        }));
-        resolve(results);
-      } else {
-        resolve([]);
-      }
-    });
-  });
+    // 구글 API는 results 배열에 검색 결과가 들어있음
+    if (!data.results) return [];
+    
+    return data.results.map(doc => ({
+      lat: doc.geometry.location.lat,
+      lng: doc.geometry.location.lng,
+      place_name: doc.name,
+      address_name: doc.formatted_address
+    }));
+  } catch (err) {
+    console.error("키워드 변환 실패", err);
+    return [];
+  }
 };
 
 
-
   const handleSearch = async (keyword, idx) => {
-   const results = await searchPlace(keyword);
-   console.log("검색 결과:", results);
+    const results = await searchPlace(keyword);
+    console.log(results)
     if (results.length > 0) {
       setSearchResults(results);
       setSelectedIdx(idx);
       setOpenDialog(true);
     } else {
-      alert("검색 결과가 없습니다.");
+      alert("검색 결과가 없습니다1.");
     }
-  };
-
-  // 선택 시 days 업데이트
-  const handleSelectPlace = (place) => {
-    setDays(prev => {
-      const updated = [...prev];
-      updated[currentTab].details[selectedIdx] = { 
-        ...updated[currentTab].details[selectedIdx], 
-        ...place 
-      };
-      return updated;
-    });
-    setOpenDialog(false);
   };
 
 
@@ -296,18 +259,28 @@ const PlanForm = () => {
       <DialogTitle>검색 결과 선택</DialogTitle>
       <DialogContent>
         <List>
-            {searchResults.map((place, i) => (
-                <ListItem 
-                button 
-                key={i} 
-                onClick={() => handleSelectPlace(place)}
-                >
-                <ListItemText 
-                    primary={place.place_name} 
-                    secondary={place.address_name} 
-                />
-                </ListItem>
-            ))}
+          {searchResults.map((place, i) => (
+            <ListItem 
+              button 
+              key={i} 
+              onClick={() => {
+                setDays(prev => {
+                  const updated = [...prev];
+                  updated[currentTab].details[selectedIdx] = { 
+                    ...updated[currentTab].details[selectedIdx], 
+                    ...place 
+                  };
+                  return updated;
+                });
+                setOpenDialog(false);
+              }}
+            >
+              <ListItemText 
+                primary={place.place_name} 
+                secondary={place.address_name} 
+              />
+            </ListItem>
+          ))}
         </List>
       </DialogContent>
       <DialogActions>
