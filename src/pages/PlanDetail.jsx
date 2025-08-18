@@ -85,7 +85,7 @@ const PlanDetail = () => {
         </Typography>
         <Box>
           {/* 상단 전체 수정/삭제 버튼 */}
-          <Button variant="outlined" size="small" sx={{ mr: 1 }}>수정</Button>
+          <Button variant="outlined" size="small" sx={{ mr: 1 }} onClick={() => navigate(`/PlanForm/${id}`)}>수정</Button>
           <Button variant="outlined" color="error" size="small">삭제</Button>
         </Box>
       </Box>
