@@ -6,8 +6,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import koLocale from 'date-fns/locale/ko';
-import { useNavigate } from 'react-router-dom';
-import { planForm } from '../services/authService';
+import { useNavigate, useParams } from 'react-router-dom';
+import { planForm, planListOne, planModify, planItemDel } from '../services/authService';
 import { format } from 'date-fns';
 
 // 팝업
@@ -21,6 +21,9 @@ import ListItemText from "@mui/material/ListItemText";
 
 
 const PlanForm = () => {
+  const { id } = useParams();
+  const numericId = Number(id);
+  const [plan, setPlan] = useState(null);
   // 팝업 상태 값
   const [searchResults, setSearchResults] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -31,10 +34,11 @@ const PlanForm = () => {
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
   const [days, setDays] = useState([
-    { day: 1, details: [{ place: "", memo: "", planSort: 1,lat:null, lng:null }] }
+    { day: 1, details: [{no:"", place: "", memo: "", planSort: 1,lat:null, lng:null }] }
   ]);
 
   const [planInfo,setPlanInfo] = useState({
+      no:'',
       title:'',
       startDate:null,
       endDate:null
@@ -52,6 +56,40 @@ const PlanForm = () => {
 
   // 카카오맵 SDK 로드
  useEffect(() => {
+  if(id != null){
+   
+    const fetchPlans = async () => {
+      try {
+        const res = await planListOne(numericId);
+        setPlan(res.data);
+        setPlanInfo({no:res.data.no,title:res.data.title,startDate:new Date(res.data.startDate),endDate:new Date(res.data.endDate)});
+        // Day별 객체로 변환
+        const dayMap = res.data?.item?.reduce((acc, curr) => {
+          if (!acc[curr.day]) acc[curr.day] = [];
+          acc[curr.day].push(curr);
+          return acc;
+        }, {}) || {}; 
+        // 묶인 데이터를 배열로 변환(렌더링용)
+        const modifyDays = Object.keys(dayMap).map(day => ({
+          day: Number(day),
+          details: dayMap[day]
+        }));
+        
+        const tabs = modifyDays.map(day => `Day ${day.day}`);
+        setDayTabs(tabs);
+        setDays(modifyDays);
+        setCurrentTab(0);
+        
+       console.log(dayTabs);
+        console.log('저장 성공', res.data);
+      } catch (err) {
+        console.error('저장 실패', err);
+      }
+    };
+    fetchPlans();
+  }
+  
+
   const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
   if (!kakaoKey) return;
 
@@ -158,15 +196,24 @@ const PlanForm = () => {
 
 
   // 장소/메모 줄 삭제
-  const handleDeletePlaceMemo = (detailIdx) => {
-    setDays(prev => {
-      const updated = [...prev];
-      updated[currentTab].details = updated[currentTab].details
-        .filter((_, i) => i !== detailIdx)
-        .map((item, idx) => ({ ...item, planSort: idx + 1 }));
-      return updated;
-    });
+  const handleDeletePlaceMemo = async (detailIdx,detailNo) => {
+    if(detailNo != null){
+      const res = await planItemDel(detailNo);
+    }
+    setDays(prev =>
+      prev.map((day, dayIdx) => {
+        if (dayIdx !== currentTab) return day;
+
+        const newDetails = day.details
+          .filter((_, i) => i !== detailIdx)
+          .map((item, idx) => ({ ...item, planSort: idx + 1 }));
+
+        return { ...day, details: newDetails };
+      })
+    );
+    
   };
+
 
 
   // 새 Day 추가
@@ -196,7 +243,12 @@ const PlanForm = () => {
     };
 
     try {
-      const res = await planForm(payload);
+      console.log(id);
+      if(id == null){
+        const res = await planForm(payload);
+      }else{
+        const res = await planModify(payload);
+      }
       console.log('저장 성공', res.data);
     } catch (err) {
       console.error('저장 실패', err);
@@ -245,7 +297,7 @@ const PlanForm = () => {
           Day {currentTab + 1} 일정
         </Typography>
 
-        {days[currentTab].details.map((detail, idx) => (
+        {days[currentTab] && days[currentTab].details.map((detail, idx) => (
           <Box key={idx} sx={{ display: "flex", gap: 2, alignItems: "center", mt: idx > 0 ? 2 : 0 }}>
             <TextField
               label="장소"
@@ -267,7 +319,7 @@ const PlanForm = () => {
               🔍검색
             </Button>
             
-            <IconButton color="error" onClick={() => handleDeletePlaceMemo(idx)} sx={{ flexShrink: 0 }}>
+            <IconButton color="error" onClick={() => handleDeletePlaceMemo(idx,detail.no)} sx={{ flexShrink: 0 }}>
               <DeleteIcon />
             </IconButton>
           </Box>

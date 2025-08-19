@@ -20,6 +20,7 @@ function App() {
             <Route path="/plans/list" element={<PlanList />} />
             <Route path="/plans/:id" element={<PlanDetail />} />
             <Route path="/plans/new" element={<PlanForm />} />
+            <Route path="/planForm/:id" element={<PlanForm />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

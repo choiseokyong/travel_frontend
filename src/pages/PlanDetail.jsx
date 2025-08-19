@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams,useNavigate } from 'react-router-dom';
 import {
   Typography,
   Box,
@@ -14,9 +14,10 @@ import {
   ListItemText,
 } from '@mui/material';
 import { Event, Place, AccessTime } from '@mui/icons-material';
-import { planListOne } from '../services/authService';
+import { planListOne,planDel } from '../services/authService';
 
 const PlanDetail = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const numericId = Number(id);
   const [plan, setPlan] = useState(null);
@@ -76,6 +77,13 @@ const PlanDetail = () => {
   //   });
   // };
 
+  const handleDeletePlace = async (planNo) => {
+    if(planNo != null){
+      const res = await planDel(planNo);
+      navigate('/plans/list');
+    }
+  };
+
   return (
     <Box p={3} sx={{ background: '#f9fafb', minHeight: '100vh' }}>
       {/* 여행 제목 */}
@@ -86,7 +94,7 @@ const PlanDetail = () => {
         <Box>
           {/* 상단 전체 수정/삭제 버튼 */}
           <Button variant="outlined" size="small" sx={{ mr: 1 }} onClick={() => navigate(`/PlanForm/${id}`)}>수정</Button>
-          <Button variant="outlined" color="error" size="small">삭제</Button>
+          <Button variant="outlined" color="error" size="small" onClick={() => handleDeletePlace(numericId)}>삭제</Button>
         </Box>
       </Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
@@ -106,14 +114,14 @@ const PlanDetail = () => {
           <CardContent>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Chip label={`Day ${d.day}`} color="primary" sx={{ mb: 2, fontWeight: 'bold' }} />
-              <Button 
+              {/* <Button 
                 variant="outlined" 
                 color="error" 
                 size="small"
                 onClick={() => handleDeleteDay(d.day)}
               >
                 Day 삭제
-              </Button>
+              </Button> */}
             </Box>
             {d.details.length > 0 ? (
               d.details.map((item, idx) => (
@@ -133,14 +141,14 @@ const PlanDetail = () => {
                     <Typography variant="body1" fontWeight="bold">{item.place}</Typography>
                     <Typography variant="body2" color="text.secondary">{item.memo}</Typography>
                   </Box>
-                  <Button 
+                  {/* <Button 
                     variant="outlined" 
                     color="error" 
                     size="small"
                     onClick={() => handleDeleteItem(d.day, idx)}
                   >
                     삭제
-                  </Button>
+                  </Button> */}
                 </Box>
 
               ))

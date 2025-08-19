@@ -10,6 +10,15 @@ export const login = (data) => api.post('/users/login', data);
 // plan 등록
 export const planForm = (data) => api.post('/plans/form', data);
 
+// plan 수정
+export const planModify = (data) => api.put('/plans/modify', data);
+
+// plan 삭제
+export const planDel = (id) => api.delete(`/plans/delete/${id}`);
+
+// planItem 삭제
+export const planItemDel = (id) => api.delete(`/plans/delete/item/${id}`);
+
 // plan 목록
 export const planList = (data) => api.get('/plans/list');
 
