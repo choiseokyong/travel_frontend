@@ -14,7 +14,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import { Event, Place, AccessTime } from '@mui/icons-material';
-import { planListOne,planDel } from '../services/authService';
+import { planListOne,planDel, planShare } from '../services/authService';
 
 const PlanDetail = () => {
   const navigate = useNavigate();
@@ -77,10 +77,21 @@ const PlanDetail = () => {
   //   });
   // };
 
+  // plan 삭제
   const handleDeletePlace = async (planNo) => {
     if(planNo != null){
       const res = await planDel(planNo);
       navigate('/plans/list');
+    }
+  };
+
+  // plan 공유
+  const handleSharePlan = async (planNo) => {
+    if(planNo != null){
+      const res = await planShare(planNo);
+      console.log(res.data);
+      alert("공유");
+      // navigate('/plans/list');
     }
   };
 
@@ -93,7 +104,8 @@ const PlanDetail = () => {
         </Typography>
         <Box>
           {/* 상단 전체 수정/삭제 버튼 */}
-          <Button variant="outlined" size="small" sx={{ mr: 1 }} onClick={() => navigate(`/PlanForm/${id}`)}>수정</Button>
+          <Button variant="outlined" color="primary" size="small" sx={{ mr: 1 }} onClick={() => handleSharePlan(numericId)}>일정 공유</Button>
+          <Button variant="outlined" size="small" sx={{ mr: 1 }}  onClick={() => navigate(`/PlanForm/${id}`)}>수정</Button>
           <Button variant="outlined" color="error" size="small" onClick={() => handleDeletePlace(numericId)}>삭제</Button>
         </Box>
       </Box>

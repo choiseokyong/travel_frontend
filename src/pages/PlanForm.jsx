@@ -253,7 +253,7 @@ const PlanForm = () => {
     } catch (err) {
       console.error('저장 실패', err);
     }
-    // navigate('/');
+    navigate('/plans/list');
   };
 
   return (
