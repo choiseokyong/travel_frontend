@@ -14,12 +14,13 @@ import {
   ListItemText,
 } from '@mui/material';
 import { Event, Place, AccessTime } from '@mui/icons-material';
-import { planListOne,planDel, planShare } from '../services/authService';
+import { planSharePage } from '../services/authService';
 
-const PlanDetail = () => {
+const SharedPlanPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const numericId = Number(id);
+//   const [id, setId] = useState(null);
+//   const numericId = Number(id);
+  const { uuid } = useParams();
   const [plan, setPlan] = useState(null);
   // Day별 객체로 변환
   const dayMap = plan?.item?.reduce((acc, curr) => {
@@ -37,15 +38,16 @@ const PlanDetail = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const res = await planListOne(numericId);
+        const res = await planSharePage(uuid);
         setPlan(res.data);
+        
         console.log('저장 성공', res.data);
       } catch (err) {
         console.error('저장 실패', err);
       }
     };
     fetchPlans();
-  }, [numericId]);
+  }, [uuid]);
 
   if (!plan) {
     return (
@@ -77,23 +79,23 @@ const PlanDetail = () => {
   //   });
   // };
 
-  // plan 삭제
-  const handleDeletePlace = async (planNo) => {
-    if(planNo != null){
-      const res = await planDel(planNo);
-      navigate('/plans/list');
-    }
-  };
+//   // plan 삭제
+//   const handleDeletePlace = async (planNo) => {
+//     if(planNo != null){
+//       const res = await planDel(planNo);
+//       navigate('/plans/list');
+//     }
+//   };
 
-  // plan 공유
-  const handleSharePlan = async (planNo) => {
-    if(planNo != null){
-      const res = await planShare(planNo);
-      console.log(res.data);
-      alert("공유 링크\n"+res.data);
-      // navigate('/plans/list');
-    }
-  };
+//   // plan 공유
+//   const handleSharePlan = async (planNo) => {
+//     if(planNo != null){
+//       const res = await planShare(planNo);
+//       console.log(res.data);
+//       alert("공유 링크\n"+res.data);
+//       // navigate('/plans/list');
+//     }
+//   };
 
   return (
     <Box p={3} sx={{ background: '#f9fafb', minHeight: '100vh' }}>
@@ -102,12 +104,11 @@ const PlanDetail = () => {
         <Typography variant="h4" gutterBottom fontWeight="bold">
           {plan.title}
         </Typography>
-        <Box>
-          {/* 상단 전체 수정/삭제 버튼 */}
+        {/* <Box>
           <Button variant="outlined" color="primary" size="small" sx={{ mr: 1 }} onClick={() => handleSharePlan(numericId)}>일정 공유</Button>
           <Button variant="outlined" size="small" sx={{ mr: 1 }}  onClick={() => navigate(`/PlanForm/${id}`)}>수정</Button>
           <Button variant="outlined" color="error" size="small" onClick={() => handleDeletePlace(numericId)}>삭제</Button>
-        </Box>
+        </Box> */}
       </Box>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <Event color="primary" />
@@ -174,4 +175,4 @@ const PlanDetail = () => {
   );
 };
 
-export default PlanDetail;
+export default SharedPlanPage;

@@ -1,8 +1,12 @@
 // src/services/authService.js
 import api from './api';
+import NoApi from './NoApi';
 
 // 일정 공유
-export const planShare = (id) => api.post(`/plans/share/${id}`);
+export const planSharePage = (uuid) => NoApi.get(`/plans/share/${uuid}`);
+
+// 일정 공유
+export const planShare = (id) => api.post(`/plans/share/new/${id}`);
 
 // 회원가입
 export const signup = (data) => api.post('/users/form', data);
