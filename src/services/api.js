@@ -3,6 +3,15 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:8080', // 백엔드 주소 (STS4 서버)
+  withCredentials: true, // refreshToken 쿠키 전송용
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+const refreshApi = axios.create({
+  baseURL: 'http://localhost:8080', // 백엔드 주소 (STS4 서버)
+  withCredentials: true, // refreshToken 쿠키 전송용
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,10 +35,27 @@ api.interceptors.request.use(
 // 응답 인터셉터 (401 처리)
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('accessToken');
-      window.location.href = '/login'; // 인증 만료 시 로그인으로 이동
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try{
+        // Refresh 요청
+        const res = await refreshApi.post("/users/auth/refresh");
+        console.log(res.data);
+        const newAccessToken = res.data.token;
+  
+
+        // 새 토큰 저장 (ex. localStorage)
+        localStorage.setItem("accessToken", newAccessToken);
+
+        // 헤더 갱신 후 요청 재시도
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      }catch(err){
+        // Refresh도 실패 → 로그인 화면으로 이동
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
