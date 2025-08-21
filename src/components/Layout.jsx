@@ -6,16 +6,16 @@ import Header from './Header';
 const Layout = () => {
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // 마운트 시 세션스토리지 토큰 확인해서 로그인 상태 초기화
+  // 마운트 시 로컬스토리지 토큰 확인해서 로그인 상태 초기화
   useEffect(() => {
-    const token = sessionStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
     // console.log(token);
     setIsLoggedIn(!!token);
   }, []);
 
   // 로그아웃 함수
   const handleLogout = () => {
-    sessionStorage.removeItem('accessToken');
+    localStorage.removeItem('accessToken');
     setIsLoggedIn(false);
     window.location.href = '/login'; 
   };

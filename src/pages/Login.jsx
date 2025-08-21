@@ -45,10 +45,10 @@ export default function Login() {
         const response = await login(logininfo);
         // 서버에서 JWT 발급받아 저장
       console.log('로그인 버튼 클릭됨', response.data);
-        sessionStorage.setItem("accessToken", response.data.token);
+        localStorage.setItem("accessToken", response.data.token);
         // 성공 처리
         // setSuccess(true);
-        console.log('로그인 성공:', sessionStorage.getItem('accessToken'));
+        console.log('로그인 성공:', localStorage.getItem('accessToken'));
         onLogin();
         navigate('/');
       } catch (err) {
