@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: 'http://localhost:8080', // 백엔드 주소 (STS4 서버)
   withCredentials: true, // refreshToken 쿠키 전송용
   headers: {
@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-const refreshApi = axios.create({
+export const refreshApi = axios.create({
   baseURL: 'http://localhost:8080', // 백엔드 주소 (STS4 서버)
   withCredentials: true, // refreshToken 쿠키 전송용
   headers: {
@@ -61,4 +61,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+

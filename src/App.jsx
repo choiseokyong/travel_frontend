@@ -10,11 +10,13 @@ import PlanList from './pages/PlanList';
 import PlanDetail from './pages/PlanDetail';
 import ProtectedRoute from './components/ProtectedRoute';
 import SharedPlanPage from './pages/SharedPlanPage';
+import MyPage from './pages/MyPage';
 
 function App() {
  return (
     <BrowserRouter>
       <Routes>
+        <Route path="/plans/share/:uuid" element={<SharedPlanPage />} />
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route element={<ProtectedRoute/>}>
@@ -22,8 +24,9 @@ function App() {
             <Route path="/plans/:id" element={<PlanDetail />} />
             <Route path="/plans/new" element={<PlanForm />} />
             <Route path="/planForm/:id" element={<PlanForm />} />
+            <Route path="/users/mypage" element={<MyPage />} />
           </Route>
-          <Route path="/plans/share/:uuid" element={<SharedPlanPage />} />
+          
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           

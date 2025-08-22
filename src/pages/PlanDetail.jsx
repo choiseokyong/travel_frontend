@@ -8,11 +8,14 @@ import {
   CardContent,
   Divider,
   Chip,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
 } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Event, Place, AccessTime } from '@mui/icons-material';
 import { planListOne,planDel, planShare } from '../services/authService';
 
@@ -21,6 +24,12 @@ const PlanDetail = () => {
   const { id } = useParams();
   const numericId = Number(id);
   const [plan, setPlan] = useState(null);
+
+  // 공유 링크 모달 상태
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [copied, setCopied] = useState(false);
+
   // Day별 객체로 변환
   const dayMap = plan?.item?.reduce((acc, curr) => {
     if (!acc[curr.day]) acc[curr.day] = [];
@@ -47,15 +56,7 @@ const PlanDetail = () => {
     fetchPlans();
   }, [numericId]);
 
-  if (!plan) {
-    return (
-      <Box p={3} display="flex" justifyContent="center" alignItems="center">
-        <Typography variant="h6" color="text.secondary">
-          일정을 불러오는 중...
-        </Typography>
-      </Box>
-    );
-  }
+  
 
   // const handleDetailChange = (dayIdx, detailIdx, field, value) => {
   //   setPlan(prev => {
@@ -90,10 +91,27 @@ const PlanDetail = () => {
     if(planNo != null){
       const res = await planShare(planNo);
       console.log(res.data);
-      alert("공유 링크\n"+res.data);
-      // navigate('/plans/list');
+      setShareLink(res.data); // API에서 받은 링크 저장
+      setShareOpen(true);      // 모달 오픈
     }
   };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(shareLink).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  if (!plan) {
+    return (
+      <Box p={3} display="flex" justifyContent="center" alignItems="center">
+        <Typography variant="h6" color="text.secondary">
+          일정을 불러오는 중...
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box p={3} sx={{ background: '#f9fafb', minHeight: '100vh' }}>
@@ -170,6 +188,29 @@ const PlanDetail = () => {
           </CardContent>
         </Card>
       ))}
+      {/* 공유 링크 모달 */}
+      <Dialog open={shareOpen} onClose={() => setShareOpen(false)}>
+        <DialogTitle>공유 링크</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            variant="outlined"
+            value={shareLink}
+            InputProps={{
+              readOnly: true,
+              endAdornment: (
+                <IconButton onClick={handleCopy}>
+                  <ContentCopyIcon />
+                </IconButton>
+              ),
+            }}
+          />
+          {copied && <p style={{ color: 'green', marginTop: '8px' }}>복사되었습니다!</p>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShareOpen(false)} color="secondary">닫기</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
+import { logout } from '../services/authService';
 
 const Layout = () => {
   
@@ -14,8 +15,9 @@ const Layout = () => {
   }, []);
 
   // 로그아웃 함수
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('accessToken');
+    const res = await logout();
     setIsLoggedIn(false);
     window.location.href = '/login'; 
   };

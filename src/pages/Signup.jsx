@@ -22,7 +22,8 @@ export default function Signup() {
   const [form,setForm] = useState({
     name:'',
     email:'',
-    passWord:''
+    passWord:'',
+    grade:''
   });
 
   const [error, setError] = useState(null);
@@ -44,13 +45,16 @@ export default function Signup() {
       const response = await signup(form);
       // 성공 처리
       setSuccess(true);
-      console.log('회원가입 성공:', response.data);
+      alert("회원가입 성공");
+      navigate('/login');
+      
     } catch (err) {
       // 에러 처리
       setError(err.response?.data?.message || '회원가입 실패');
+      alert("회원가입 실패");
     }
     // 여기서 API 호출 → 성공하면 navigate('/login')
-    navigate('/login');
+    
   };
 
   return (

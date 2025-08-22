@@ -21,14 +21,22 @@ const Header = ({ isLoggedIn, onLogout }) => {
         >
           나의 일정
         </Button>
-        <Button
+        {/* <Button
           color="inherit"
           onClick={() => navigate('/plans/new')}
           sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
         >
           일정 만들기
-        </Button>
+        </Button> */}
         {isLoggedIn ?(
+          <>
+          <Button
+            color="inherit"
+            onClick={() => navigate('/users/mypage')}
+            sx={{ fontWeight: 'bold', ':hover': { backgroundColor: '#ffb74d', color: '#212121' } }}
+          >
+            마이페이지
+          </Button>
           <Button
             color="inherit"
             onClick={onLogout}
@@ -36,6 +44,7 @@ const Header = ({ isLoggedIn, onLogout }) => {
           >
             로그아웃
           </Button>
+          </>
         ) : (
           <>
           <Button
