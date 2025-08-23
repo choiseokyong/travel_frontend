@@ -36,7 +36,7 @@ export const planDel = (id) => api.delete(`/plans/delete/${id}`);
 export const planItemDel = (id) => api.delete(`/plans/delete/item/${id}`);
 
 // plan 목록
-export const planList = (data) => api.get('/plans/list');
+export const planList = (data) => api.post('/plans/list', data);
 
 // plan 1개 목록
 export const planListOne = (id) => api.get(`/plans/list/${id}`);
