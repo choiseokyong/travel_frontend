@@ -16,7 +16,7 @@ const PlanList = () => {
   const [plans, setPlans] = useState([]);
   const [pageInfo, setPageInfo] = useState({ 
     page: 0, 
-    size: 2,
+    size: 1,
     keyword: '',
     sort: 1,
     totalPage: 0
@@ -129,21 +129,44 @@ const PlanList = () => {
       </Grid>
 
       {/* 페이징 버튼 */}
-      {pageInfo.totalPage > 0 &&
-        <Box display="flex" justifyContent="center" flexWrap="wrap" gap={1} mt={4}>
-          {Array.from({ length: pageInfo.totalPage }, (_, idx) => (
-            <Button
-              key={idx}
-              variant={pageInfo.page / pageInfo.size === idx ? 'contained' : 'outlined'}
-              color="primary"
-              onClick={() => fetchPlans(idx)} // 서버 기준 0부터
-            >
-              {idx + 1} 
-            </Button>
-          ))}
-        </Box>
+      {pageInfo.totalPage > 0 && (
+  <Box display="flex" justifyContent="center" alignItems="center" flexWrap="wrap" gap={1} mt={4}>
 
-      }
+    {/* 이전 화살표 */}
+    <Button
+      variant="outlined"
+      color="primary"
+      disabled={pageInfo.page === 0} // 첫 페이지면 비활성
+      onClick={() => fetchPlans(pageInfo.page - 1)}
+    >
+      &lt; {/* 왼쪽 화살표 */}
+    </Button>
+
+    {/* 페이지 번호 버튼 */}
+    {Array.from({ length: pageInfo.totalPage }, (_, idx) => (
+      <Button
+        key={idx}
+        variant={pageInfo.page === idx ? 'contained' : 'outlined'}
+        color="primary"
+        onClick={() => fetchPlans(idx)}
+      >
+        {idx + 1}
+      </Button>
+    ))}
+
+    {/* 다음 화살표 */}
+    <Button
+      variant="outlined"
+      color="primary"
+      disabled={pageInfo.page === pageInfo.totalPage - 1} // 마지막 페이지면 비활성
+      onClick={() => fetchPlans(pageInfo.page + 1)}
+    >
+      &gt; {/* 오른쪽 화살표 */}
+    </Button>
+
+  </Box>
+)}
+
 
     </Box>
   );
