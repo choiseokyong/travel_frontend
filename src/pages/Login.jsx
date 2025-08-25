@@ -49,11 +49,13 @@ export default function Login() {
         // 성공 처리
         // setSuccess(true);
         console.log('로그인 성공:', localStorage.getItem('accessToken'));
+        alert("로그인 성공");
         onLogin();
         navigate('/');
       } catch (err) {
         // 에러 처리
         setError(err.response?.data?.message || '로그인 실패');
+        alert("로그인 실패");
       }
       // 여기서 API 호출 → 성공하면 navigate('/login')
       

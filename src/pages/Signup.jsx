@@ -41,6 +41,28 @@ export default function Signup() {
     setError(null);
     setSuccess(false);
 
+     // 프론트엔드 유효성 검사
+  if (!form.name || !form.email || !form.passWord) {
+    setError('모든 필드를 입력해주세요.');
+    alert('모든 필드를 입력해주세요.');
+    return;
+  }
+
+  // 이메일 형식 체크
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(form.email)) {
+    setError('올바른 이메일 형식이 아닙니다.');
+    alert('올바른 이메일 형식이 아닙니다.');
+    return;
+  }
+
+  // 비밀번호 길이 체크
+  if (form.passWord.length < 8) {
+    setError('비밀번호는 최소 6자리 이상이어야 합니다.');
+    alert('비밀번호는 최소 8자리 이상이어야 합니다.');
+    return;
+  }
+
     try {
       const response = await signup(form);
       // 성공 처리
