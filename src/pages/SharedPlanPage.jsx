@@ -117,7 +117,7 @@ const SharedPlanPage = () => {
         </Typography>
       </Box>
       <Typography variant="body2" gutterBottom color="text.secondary">
-        {plan.description || '여행 설명이 없습니다.'}
+        {plan.memo || '여행 설명이 없습니다.'}
       </Typography>
       <Divider sx={{ my: 2 }} />
 

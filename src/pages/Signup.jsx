@@ -73,7 +73,7 @@ export default function Signup() {
     } catch (err) {
       // 에러 처리
       setError(err.response?.data?.message || '회원가입 실패');
-      alert("회원가입 실패");
+      alert(err.response.data.error);
     }
     // 여기서 API 호출 → 성공하면 navigate('/login')
     

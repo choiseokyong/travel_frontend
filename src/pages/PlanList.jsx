@@ -99,7 +99,7 @@ const end = Math.min(start + pageGroupSize, pageInfo.totalPage);
                 </Box>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} noWrap>
-                  {plan.description || '여행 메모가 없습니다.'}
+                  {plan.memo || '여행 메모가 없습니다.'}
                 </Typography>
               </CardContent>
             </Card>

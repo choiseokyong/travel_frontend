@@ -41,7 +41,8 @@ const PlanForm = () => {
       no:'',
       title:'',
       startDate:null,
-      endDate:null
+      endDate:null,
+      memo:''
     });
 
   const handleChange = (field, value) => {
@@ -62,7 +63,7 @@ const PlanForm = () => {
       try {
         const res = await planListOne(numericId);
         setPlan(res.data);
-        setPlanInfo({no:res.data.no,title:res.data.title,startDate:new Date(res.data.startDate),endDate:new Date(res.data.endDate)});
+        setPlanInfo({no:res.data.no,title:res.data.title,startDate:new Date(res.data.startDate),endDate:new Date(res.data.endDate),memo:res.data.memo});
         // Day별 객체로 변환
         const dayMap = res.data?.item?.reduce((acc, curr) => {
           if (!acc[curr.day]) acc[curr.day] = [];
@@ -80,7 +81,7 @@ const PlanForm = () => {
         setDays(modifyDays);
         setCurrentTab(0);
         
-       console.log(dayTabs);
+      
         console.log('저장 성공', res.data);
       } catch (err) {
         console.error('저장 실패', err);
@@ -280,6 +281,15 @@ const PlanForm = () => {
             onChange={(newValue) => handleChange('endDate',newValue)}
           />
         </LocalizationProvider>
+        <TextField
+          label="메모"
+          value={planInfo.memo}
+          onChange={(e) => handleChange('memo', e.target.value)}
+          fullWidth
+          multiline      // 여러 줄 입력 가능
+          rows={4}       // 기본 표시 줄 수
+          placeholder="여행 관련 메모를 입력하세요"
+        />
       </Stack>
 
       {/* Day 탭 */}
