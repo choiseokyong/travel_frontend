@@ -9,28 +9,17 @@ import koLocale from 'date-fns/locale/ko';
 import { useNavigate, useParams } from 'react-router-dom';
 import { planForm, planListOne, planModify, planItemDel } from '../services/authService';
 import { format } from 'date-fns';
-
-// 팝업
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
+import ModalMapSearch from "./ModalMapSearch";
 
 
 const PlanForm = () => {
   const { id } = useParams();
   const numericId = Number(id);
   const [plan, setPlan] = useState(null);
-  // 팝업 상태 값
-  const [searchResults, setSearchResults] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedIdx, setSelectedIdx] = useState(null);
-  // const [title, setTitle] = useState('');
-  // const [startDate, setStartDate] = useState(null);
-  // const [endDate, setEndDate] = useState(null);
+  // 장소 선택 값
+  const [onSelectPlace, setOnSelectPlace] = useState(null);
+
+  console.log("Place : "+onSelectPlace);
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
   const [days, setDays] = useState([
@@ -54,8 +43,32 @@ const PlanForm = () => {
   const navigate = useNavigate();
 
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
+useEffect(() => {
+    if (days) {
+      console.log("부모에서 받은 선택 장소:", days);
+    }
+  }, [days]);
+ // 선택된 장소가 바뀌면 현재 Day, 현재 detail에 반영
 
-  // 카카오맵 SDK 로드
+  const [selectedIdx, setSelectedIdx] = useState(0); // 선택된 detail 인덱스
+  useEffect(() => {
+    if (onSelectPlace !== null && selectedIdx != null) {
+      setDays(prev => {
+        const updated = [...prev];
+        updated[currentTab].details[selectedIdx] = {
+          ...updated[currentTab].details[selectedIdx],
+          place: onSelectPlace.place_name,
+          lat: onSelectPlace.y,
+          lng: onSelectPlace.x,
+          address: onSelectPlace.road_address_name || onSelectPlace.address_name,
+        };
+        return updated;
+      });
+      // 선택 반영 후 초기화
+    setOnSelectPlace(null);
+    }
+  }, [onSelectPlace, currentTab, selectedIdx]);
+
  useEffect(() => {
   if(id != null){
    
@@ -89,50 +102,52 @@ const PlanForm = () => {
     };
     fetchPlans();
   }
+
+  
   
 
-  const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-  if (!kakaoKey) return;
+  // const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
+  // if (!kakaoKey) return;
 
-  const script = document.createElement('script');
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services&autoload=false`;
-  script.async = true;
+  // const script = document.createElement('script');
+  // script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services&autoload=false`;
+  // script.async = true;
 
-  script.onload = () => {
-    console.log("Kakao SDK 스크립트 로드 완료");
+  // script.onload = () => {
+  //   console.log("Kakao SDK 스크립트 로드 완료");
 
-    // SDK가 완전히 준비될 때까지 load() 사용
-    window.kakao.maps.load(() => {
-      console.log("Kakao Maps 준비 완료", window.kakao.maps.services);
-      setKakaoLoaded(true);
-    });
-  };
+  //   // SDK가 완전히 준비될 때까지 load() 사용
+  //   window.kakao.maps.load(() => {
+  //     console.log("Kakao Maps 준비 완료", window.kakao.maps.services);
+  //     setKakaoLoaded(true);
+  //   });
+  // };
 
-  document.head.appendChild(script);
+  // document.head.appendChild(script);
 }, []);
 
   // 🔹 카카오맵 검색
-  const searchPlace = async (keyword) => {
-  if (!kakaoLoaded || !window.kakao?.maps?.services || !keyword) return [];
+//   const searchPlace = async (keyword) => {
+//   if (!kakaoLoaded || !window.kakao?.maps?.services || !keyword) return [];
 
-  return new Promise((resolve, reject) => {
-    const ps = new window.kakao.maps.services.Places();
-    ps.keywordSearch(keyword, (data, status) => {
-      console.log("검색 상태:", status, data);
-      if (status === window.kakao.maps.services.Status.OK) {
-        const results = data.map(item => ({
-          lat: item.y,
-          lng: item.x,
-          place_name: item.place_name,
-          address_name: item.road_address_name || item.address_name
-        }));
-        resolve(results);
-      } else {
-        resolve([]);
-      }
-    });
-  });
-};
+//   return new Promise((resolve, reject) => {
+//     const ps = new window.kakao.maps.services.Places();
+//     ps.keywordSearch(keyword, (data, status) => {
+//       console.log("검색 상태:", status, data);
+//       if (status === window.kakao.maps.services.Status.OK) {
+//         const results = data.map(item => ({
+//           lat: item.y,
+//           lng: item.x,
+//           place_name: item.place_name,
+//           address_name: item.road_address_name || item.address_name
+//         }));
+//         resolve(results);
+//       } else {
+//         resolve([]);
+//       }
+//     });
+//   });
+// };
 
 
 
@@ -321,13 +336,12 @@ const PlanForm = () => {
               onChange={(e) => handleDetailChange(idx, "memo", e.target.value)}
               fullWidth
             />
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => handleSearch(detail.place, idx)}
-            >
-              🔍검색
-            </Button>
+            
+            <ModalMapSearch
+              idx={idx}                  // 줄 인덱스 전달
+              onOpen={() => setSelectedIdx(idx)}  // 모달 열릴 때 선택된 줄 세팅
+              onSelectPlace={(place) => setOnSelectPlace(place)} // useEffect에서 반영
+            />
             
             <IconButton color="error" onClick={() => handleDeletePlaceMemo(idx,detail.no)} sx={{ flexShrink: 0 }}>
               <DeleteIcon />
@@ -354,28 +368,7 @@ const PlanForm = () => {
 
       
     </Box>
-    <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth>
-      <DialogTitle>검색 결과 선택</DialogTitle>
-      <DialogContent>
-        <List>
-            {searchResults.map((place, i) => (
-                <ListItem 
-                button 
-                key={i} 
-                onClick={() => handleSelectPlace(place)}
-                >
-                <ListItemText 
-                    primary={place.place_name} 
-                    secondary={place.address_name} 
-                />
-                </ListItem>
-            ))}
-        </List>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setOpenDialog(false)}>닫기</Button>
-      </DialogActions>
-    </Dialog>
+    
     </Container>
     
   );
