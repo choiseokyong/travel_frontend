@@ -251,7 +251,7 @@ const handleDayMapOpen = (dayDetails, dayNumber) => {
       <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="lg" fullWidth>
         <DialogTitle>Day 지도</DialogTitle>
         <DialogContent style={{ height: '600px' }}>
-          <MapView markers={mapMarkers} />
+          <MapView markers={mapMarkers} drawPolyline={true}/>
         </DialogContent>
       </Dialog>
 

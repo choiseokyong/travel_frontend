@@ -81,7 +81,7 @@ const MapSearchPage = ({ onSelectPlace }) => {
 
       {/* 지도 */}
       <div style={{ flex: 1, height: "100%" }}>
-        <MapView markers={markers} center={markers[0]} />
+        <MapView markers={markers} center={markers[0]} drawPolyline={false} />
       </div>
     </div>
   );

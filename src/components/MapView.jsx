@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from "react";
 
-const MapView = ({ markers = [], center }) => {
+const MapView = ({ markers = [], center , drawPolyline=false }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markerRefs = useRef([]);
+  const polylineRef = useRef(null);
 
   useEffect(() => {
     const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
@@ -24,6 +25,7 @@ const MapView = ({ markers = [], center }) => {
 
       // 초기 마커 표시
       updateMarkers();
+      updatePolyline(); // Polyline도 SDK 로드 후에 실행
     };
 
     const updateMarkers = () => {
@@ -52,6 +54,28 @@ const MapView = ({ markers = [], center }) => {
       }
     };
 
+    const updatePolyline = () => {
+      if(polylineRef.current){
+        polylineRef.current.setMap(null);
+      }
+
+      if (drawPolyline && markers.length > 1) {
+        const path = markers.map(
+          (m) => new window.kakao.maps.LatLng(m.lat, m.lng)
+        );
+
+        polylineRef.current = new window.kakao.maps.Polyline({
+          path,
+          strokeWeight: 5,
+          strokeColor: "#14a4b1ff",
+          strokeOpacity: 0.9,
+          strokeStyle: "solid",
+        });
+        polylineRef.current.setMap(mapInstance.current);
+      }
+    };
+    
+
     if (!window.kakao) {
       const script = document.createElement("script");
       script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services&autoload=false`;
@@ -68,8 +92,12 @@ const MapView = ({ markers = [], center }) => {
       // 언마운트 시 마커 제거
       markerRefs.current.forEach((m) => m.setMap(null));
       markerRefs.current = [];
+      if (polylineRef.current) {
+        polylineRef.current.setMap(null);
+        polylineRef.current = null;
+      }
     };
-  }, [markers, center]);
+  }, [markers, center, drawPolyline]);
 
   return <div ref={mapRef} style={{ width: "100%", height: "100%" }} />;
 };
