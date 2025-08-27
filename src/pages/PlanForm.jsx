@@ -53,6 +53,7 @@ useEffect(() => {
   const [selectedIdx, setSelectedIdx] = useState(0); // 선택된 detail 인덱스
   useEffect(() => {
     if (onSelectPlace !== null && selectedIdx != null) {
+      console.log("selectedIdx : " + selectedIdx);
       setDays(prev => {
         const updated = [...prev];
         updated[currentTab].details[selectedIdx] = {
@@ -151,17 +152,7 @@ useEffect(() => {
 
 
 
-  const handleSearch = async (keyword, idx) => {
-   const results = await searchPlace(keyword);
-   console.log("검색 결과:", results);
-    if (results.length > 0) {
-      setSearchResults(results);
-      setSelectedIdx(idx);
-      setOpenDialog(true);
-    } else {
-      alert("검색 결과가 없습니다.");
-    }
-  };
+ 
 
   // 선택 시 days 업데이트
   const handleSelectPlace = (place) => {
@@ -260,10 +251,11 @@ useEffect(() => {
 
     try {
       console.log(id);
+      let res;
       if(id == null){
-        const res = await planForm(payload);
+        res = await planForm(payload);
       }else{
-        const res = await planModify(payload);
+        res = await planModify(payload);
       }
       console.log('저장 성공', res.data);
     } catch (err) {
@@ -339,8 +331,9 @@ useEffect(() => {
             
             <ModalMapSearch
               idx={idx}                  // 줄 인덱스 전달
-              onOpen={() => setSelectedIdx(idx)}  // 모달 열릴 때 선택된 줄 세팅
-              onSelectPlace={(place) => setOnSelectPlace(place)} // useEffect에서 반영
+              onSelectPlace={(place, idx) => {
+                setSelectedIdx(idx);
+                setOnSelectPlace(place);}} // useEffect에서 반영
             />
             
             <IconButton color="error" onClick={() => handleDeletePlaceMemo(idx,detail.no)} sx={{ flexShrink: 0 }}>

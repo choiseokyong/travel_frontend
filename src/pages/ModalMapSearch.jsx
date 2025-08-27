@@ -25,7 +25,7 @@ const ModalMapSearch = ({ onSelectPlace,idx }) => {
           <MapSearchPage
             idx={idx}
             onSelectPlace={(place) => {
-              onSelectPlace(place); // 부모로 값 전달
+              onSelectPlace(place,idx); // 부모로 값 전달
               handleClose(); // 선택 후 모달 닫기
             }}
           />

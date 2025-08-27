@@ -18,12 +18,37 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Event, Place, AccessTime } from '@mui/icons-material';
 import { planListOne,planDel, planShare } from '../services/authService';
+import MapPlanDetail from "../components/MapPlanDetail";
+import MapView from "../components/MapView"; // MapView 임포트
 
 const PlanDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const numericId = Number(id);
   const [plan, setPlan] = useState(null);
+
+  // 맵 모달
+  const [mapOpen, setMapOpen] = useState(false);
+  const [mapMarkers, setMapMarkers] = useState([]);
+  const [mapTitle, setMapTitle] = useState('');
+
+  // PlanDetail 상단에 추가
+const handleDayMapOpen = (dayDetails, dayNumber) => {
+  
+  const markers = dayDetails
+    .filter(item => item.lat != null && item.lng != null)
+    .map(item => ({ lat: item.lat, lng: item.lng }));
+  console.log("dayDetails++ ",markers);
+  if (markers.length === 0) {
+    alert("해당 Day에 지도에 표시할 장소가 없습니다.");
+    return;
+  }
+
+  setMapMarkers(markers);
+  setMapTitle(`Day ${dayNumber} 지도`);
+  setMapOpen(true);
+};
+
 
   // 공유 링크 모달 상태
   const [shareOpen, setShareOpen] = useState(false);
@@ -144,6 +169,16 @@ const PlanDetail = () => {
           <CardContent>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Chip label={`Day ${d.day}`} color="primary" sx={{ mb: 2, fontWeight: 'bold' }} />
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Place />}
+                sx={{ mb: 1 }}
+                onClick={() => handleDayMapOpen(d.details, d.day)}
+              >
+                지도 보기
+              </Button>
+
               {/* <Button 
                 variant="outlined" 
                 color="error" 
@@ -179,6 +214,7 @@ const PlanDetail = () => {
                   >
                     삭제
                   </Button> */}
+                  
                 </Box>
 
               ))
@@ -211,6 +247,15 @@ const PlanDetail = () => {
           <Button onClick={() => setShareOpen(false)} color="secondary">닫기</Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="lg" fullWidth>
+        <DialogTitle>Day 지도</DialogTitle>
+        <DialogContent style={{ height: '600px' }}>
+          <MapView markers={mapMarkers} />
+        </DialogContent>
+      </Dialog>
+
+
     </Box>
   );
 };
