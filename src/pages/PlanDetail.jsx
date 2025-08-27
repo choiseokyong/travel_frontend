@@ -18,7 +18,6 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Event, Place, AccessTime } from '@mui/icons-material';
 import { planListOne,planDel, planShare } from '../services/authService';
-import MapPlanDetail from "../components/MapPlanDetail";
 import MapView from "../components/MapView"; // MapView 임포트
 
 const PlanDetail = () => {
@@ -36,9 +35,10 @@ const PlanDetail = () => {
 const handleDayMapOpen = (dayDetails, dayNumber) => {
   
   const markers = dayDetails
-    .filter(item => item.lat != null && item.lng != null)
+    .filter(item => item.lat != null && item.lng != null &&
+    !(item.lat === 0 && item.lng === 0))
     .map(item => ({ lat: item.lat, lng: item.lng }));
-  console.log("dayDetails++ ",markers);
+  
   if (markers.length === 0) {
     alert("해당 Day에 지도에 표시할 장소가 없습니다.");
     return;
