@@ -18,8 +18,6 @@ const PlanForm = () => {
   const [plan, setPlan] = useState(null);
   // 장소 선택 값
   const [onSelectPlace, setOnSelectPlace] = useState(null);
-
-  console.log("Place : "+onSelectPlace);
   const [dayTabs, setDayTabs] = useState(['Day 1']);
   const [currentTab, setCurrentTab] = useState(0);
   const [days, setDays] = useState([
@@ -33,6 +31,10 @@ const PlanForm = () => {
       endDate:null,
       memo:''
     });
+  const [dayDelInfo, setDayDelInfo] = useState({
+    planNo:numericId,
+    day:0
+  });
 
   const handleChange = (field, value) => {
     setPlanInfo((prev) => ({
@@ -107,52 +109,8 @@ useEffect(() => {
   
   
 
-  // const kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY;
-  // if (!kakaoKey) return;
-
-  // const script = document.createElement('script');
-  // script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoKey}&libraries=services&autoload=false`;
-  // script.async = true;
-
-  // script.onload = () => {
-  //   console.log("Kakao SDK 스크립트 로드 완료");
-
-  //   // SDK가 완전히 준비될 때까지 load() 사용
-  //   window.kakao.maps.load(() => {
-  //     console.log("Kakao Maps 준비 완료", window.kakao.maps.services);
-  //     setKakaoLoaded(true);
-  //   });
-  // };
-
-  // document.head.appendChild(script);
+  
 }, []);
-
-  // 🔹 카카오맵 검색
-//   const searchPlace = async (keyword) => {
-//   if (!kakaoLoaded || !window.kakao?.maps?.services || !keyword) return [];
-
-//   return new Promise((resolve, reject) => {
-//     const ps = new window.kakao.maps.services.Places();
-//     ps.keywordSearch(keyword, (data, status) => {
-//       console.log("검색 상태:", status, data);
-//       if (status === window.kakao.maps.services.Status.OK) {
-//         const results = data.map(item => ({
-//           lat: item.y,
-//           lng: item.x,
-//           place_name: item.place_name,
-//           address_name: item.road_address_name || item.address_name
-//         }));
-//         resolve(results);
-//       } else {
-//         resolve([]);
-//       }
-//     });
-//   });
-// };
-
-
-
- 
 
   // 선택 시 days 업데이트
   const handleSelectPlace = (place) => {
@@ -230,6 +188,47 @@ useEffect(() => {
     setDayTabs(prev => [...prev, `Day ${nextDay}`]);
     setCurrentTab(nextDay - 1);
   };
+
+
+// Day 삭제 함수
+const handleDeleteDay = async (dayIdx) => {
+  
+  if (days.length === 1) {
+    alert("마지막 Day는 삭제할 수 없습니다.");
+    return;
+  }
+  console.log("days 확인 : ", days[dayIdx].details[0].no);
+  setDays(prev => {
+    const newDays = prev.filter((_, idx) => idx !== dayIdx)
+      .map((day, idx) => ({ ...day, day: idx + 1 })); // Day 번호 재정렬
+    return newDays;
+  });
+
+  setDayTabs(prev => {
+    const newTabs = prev.filter((_, idx) => idx !== dayIdx)
+      .map((_, idx) => `Day ${idx + 1}`);
+    return newTabs;
+  });
+
+  // 현재 Tab이 삭제된 Day였으면 이전 Tab 선택
+  setCurrentTab(prev => (prev >= dayIdx ? Math.max(prev - 1, 0) : prev));
+  const delInfo = { ...dayDelInfo, day: dayIdx + 1 };
+  setDayDelInfo(delInfo); // 상태 업데이트
+  console.log("전송용:", delInfo); // 정확한 값 확인 가능
+  //  try {
+      
+  //     let res;
+  //     if(id == null){
+  //       res = await planForm(payload);
+  //     }else{
+  //       res = await planModify(payload);
+  //     }
+  //     console.log('저장 성공', res.data);
+  //   } catch (err) {
+  //     console.error('저장 실패', err);
+  //   }
+};
+
 
 
   // 저장
@@ -356,6 +355,7 @@ useEffect(() => {
       {/* 버튼 영역 */}
       <Stack direction="row" spacing={2}>
         <Button variant="outlined" onClick={handleAddDay}>+ 일차 추가</Button>
+        <Button variant="outlined" color="error" onClick={() => handleDeleteDay(currentTab)}>- 일차 삭제</Button>
         <Button type="submit" variant="contained">💾 저장</Button>
       </Stack>
 
