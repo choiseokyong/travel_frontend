@@ -35,7 +35,7 @@ const PlanForm = () => {
     planNo:numericId,
     day:0
   });
-
+  const [selectedDelDays, setSelectedDelDays] = useState([]); // 삭제 선택한 day 번호
   const handleChange = (field, value) => {
     setPlanInfo((prev) => ({
       ...prev,
@@ -190,6 +190,21 @@ useEffect(() => {
   };
 
 
+// Delete Day 선택
+const handelDelSelected = (dayIdx) => {
+  if (days.length === 1) {
+    alert("마지막 Day는 삭제할 수 없습니다.");
+    return;
+  }
+  console.log("days 확인 : ", days[dayIdx].details[0].no);
+ const newSelectedDelDays = selectedDelDays.includes(dayIdx)
+    ? selectedDelDays.filter(d => d !== dayIdx)
+    : [...selectedDelDays, dayIdx];
+
+    setSelectedDelDays(newSelectedDelDays);
+  console.log("newSelectedDelDays 확인 : ", newSelectedDelDays);
+}
+
 // Day 삭제 함수
 const handleDeleteDay = async (dayIdx) => {
   
@@ -197,36 +212,41 @@ const handleDeleteDay = async (dayIdx) => {
     alert("마지막 Day는 삭제할 수 없습니다.");
     return;
   }
-  console.log("days 확인 : ", days[dayIdx].details[0].no);
-  setDays(prev => {
-    const newDays = prev.filter((_, idx) => idx !== dayIdx)
-      .map((day, idx) => ({ ...day, day: idx + 1 })); // Day 번호 재정렬
-    return newDays;
-  });
-
-  setDayTabs(prev => {
-    const newTabs = prev.filter((_, idx) => idx !== dayIdx)
-      .map((_, idx) => `Day ${idx + 1}`);
-    return newTabs;
-  });
-
-  // 현재 Tab이 삭제된 Day였으면 이전 Tab 선택
-  setCurrentTab(prev => (prev >= dayIdx ? Math.max(prev - 1, 0) : prev));
-  const delInfo = { ...dayDelInfo, day: dayIdx + 1 };
+  const daysToDelete = selectedDelDays.map(idx => idx + 1);
+  console.log("daysToDelete 확인 : ", daysToDelete);
+  const delInfo = { ...dayDelInfo, day: daysToDelete };
   setDayDelInfo(delInfo); // 상태 업데이트
   console.log("전송용:", delInfo); // 정확한 값 확인 가능
-  //  try {
-      
-  //     let res;
-  //     if(id == null){
-  //       res = await planForm(payload);
-  //     }else{
-  //       res = await planModify(payload);
-  //     }
-  //     console.log('저장 성공', res.data);
-  //   } catch (err) {
-  //     console.error('저장 실패', err);
-  //   }
+
+   try {
+      let res = await planForm(payload);
+     
+      console.log('저장 성공', res.data);
+
+      // setDays(prev => {
+  //   const newDays = prev.filter((_, idx) => idx !== dayIdx)
+  //     .map((day, idx) => ({ ...day, day: idx + 1 })); // Day 번호 재정렬
+  //   return newDays;
+  // });
+
+  // setDayTabs(prev => {
+  //   const newTabs = prev.filter((_, idx) => idx !== dayIdx)
+  //     .map((_, idx) => `Day ${idx + 1}`);
+  //   return newTabs;
+  // });
+
+  // // 현재 Tab이 삭제된 Day였으면 이전 Tab 선택
+  // setCurrentTab(prev => (prev >= dayIdx ? Math.max(prev - 1, 0) : prev));
+  // const delInfo = { ...dayDelInfo, day: [dayIdx + 1] };
+  // setDayDelInfo(delInfo); // 상태 업데이트
+  // console.log("전송용:", delInfo); // 정확한 값 확인 가능
+    } catch (err) {
+      console.error('저장 실패', err);
+    }
+
+  
+
+  
 };
 
 
@@ -302,7 +322,17 @@ const handleDeleteDay = async (dayIdx) => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
           {dayTabs.map((label, index) => (
-            <Tab label={label} key={index} />
+            <Tab 
+              label={label} 
+              key={index}
+              // onClick={() => toggleDaySelection(index)}
+              sx={{
+                bgcolor: selectedDelDays.includes(index) ? 'error.light' : 'transparent',
+                color: selectedDelDays.includes(index) ? 'white' : 'inherit',
+                borderRadius: 1,
+                mx: 0.5,
+              }} 
+            />
           ))}
         </Tabs>
       </Box>
@@ -355,6 +385,7 @@ const handleDeleteDay = async (dayIdx) => {
       {/* 버튼 영역 */}
       <Stack direction="row" spacing={2}>
         <Button variant="outlined" onClick={handleAddDay}>+ 일차 추가</Button>
+        <Button variant="outlined" color="error" onClick={() => handelDelSelected(currentTab)}>- 일차 선택</Button>
         <Button variant="outlined" color="error" onClick={() => handleDeleteDay(currentTab)}>- 일차 삭제</Button>
         <Button type="submit" variant="contained">💾 저장</Button>
       </Stack>

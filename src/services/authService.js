@@ -35,6 +35,9 @@ export const planDel = (id) => api.delete(`/plans/delete/${id}`);
 // planItem 삭제
 export const planItemDel = (id) => api.delete(`/plans/delete/item/${id}`);
 
+// plan Day 삭제
+export const planDelDay = (data) => api.delete(`/plans/delete/day`, data);
+
 // plan 목록
 export const planList = (data) => api.post('/plans/list', data);
 
